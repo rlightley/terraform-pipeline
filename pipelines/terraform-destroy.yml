@@ -1,0 +1,35 @@
+parameters:
+  - name: tf_version
+    default: ""
+  - name: tf_state_rg
+    default: ""
+  - name: tf_state_location
+    default: ""
+  - name: tf_state_sku
+    default: ""
+  - name: tf_state_sa_name
+    default: ""
+  - name: tf_state_container_name
+    default: ""
+  - name: tf_environment
+    default: ""
+  - name: SUBSCRIPTION_NAME
+    default: ""
+  - name: env
+    default: ""
+
+stages:
+  - stage: Apply
+    displayName: Terraform apply
+    jobs:
+      - template: ../jobs/destroy.yml
+        parameters:
+          tf_version: ${{ parameters.tf_version }}
+          tf_state_rg: ${{ parameters.tf_state_rg }}
+          tf_state_location: ${{ parameters.tf_state_location }}
+          tf_state_sku: ${{ parameters.tf_state_sku }}
+          tf_state_sa_name: ${{ parameters.tf_state_sa_name }}
+          tf_state_container_name: ${{ parameters.tf_state_container_name }}
+          tf_environment: ${{ parameters.tf_environment }}
+          SUBSCRIPTION_NAME: ${{ parameters.SUBSCRIPTION_NAME }}
+          env: ${{ parameters.env }}

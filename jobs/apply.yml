@@ -1,0 +1,49 @@
+parameters:
+  tf_version: "" # what version of terraform should be used
+  tf_state_rg: "" # name of the resource group to create/use for the terraform state file
+  tf_state_location: "" # location of the resource group to create/use for the terraform state file
+  tf_state_sku: "" # sku to use when creating the storeage account to create/use for the terraform state file
+  tf_state_sa_name: "" # name of of the storage account to create/use for the terraform state file
+  tf_state_container_name: "" # name of of the container to create/use for the terraform state file
+  tf_environment: "" # prefix for the state file name e.g. prod.terraform.tfstate
+  SUBSCRIPTION_NAME: "" # service connection name   
+  env: ""
+  working_directory: ""
+
+jobs:
+- deployment: ${{ parameters.name }}
+  displayName: 'Provision ${{ parameters.env }} infrastructure'
+  environment: ${{ parameters.env }}
+  timeoutInMinutes: 0
+  strategy: 
+    runOnce:
+      deploy:
+        steps:
+        - checkout: self
+        - task: TerraformInstaller@0
+          displayName: "Install terraform"
+          inputs:
+            terraformVersion: "${{ parameters.tf_version }}"
+
+        - task: TerraformCLI@0
+          displayName: "Terraform init"
+          inputs:
+            command: "init"        
+            backendType: "azurerm"
+            backendServiceArm: AzureSponsorshipSIS
+            ensureBackend: true
+            backendAzureRmResourceGroupName: "${{ parameters.tf_state_rg }}"
+            backendAzureRmResourceGroupLocation: "${{ parameters.tf_state_location }}"
+            backendAzureRmStorageAccountName: "${{ parameters.tf_state_sa_name }}"
+            backendAzureRmStorageAccountSku: "${{ parameters.tf_state_sku }}"
+            backendAzureRmContainerName: ${{ parameters.tf_state_container_name }}
+            backendAzureRmKey: "${{ parameters.tf_environment }}.terraform.tfstate"
+            workingDirectory: '$(System.DefaultWorkingDirectory)/${{ parameters.working_directory }}'
+
+        - task: TerraformCLI@0
+          displayName: "Terraform apply"
+          inputs:
+            command: "apply"
+            commandOptions: '-var-file="terraform.${{ parameters.env }}.tfvars"'
+            environmentServiceName: "${{ parameters.SUBSCRIPTION_NAME }}"
+            workingDirectory: '$(System.DefaultWorkingDirectory)/${{ parameters.working_directory }}'

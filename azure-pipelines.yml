@@ -1,0 +1,23 @@
+name: My.Pipeline.Name.Apply
+
+pool: 
+  name: "Default"
+
+trigger:
+  branches:
+    include:
+    - main
+
+extends:
+  template: pipelines/terraform.yml
+  parameters:
+      tf_version: "1.5.6" # what version of terraform should be used
+      tf_state_rg: "rg-infrastructure-shared-uks" # name of the resource group to create/use for the terraform state file
+      tf_state_location: "ukSouth" # location of the resource group to create/use for the terraform state file
+      tf_state_sku: "Standard_LRS" # sku to use when creating the storeage account to create/use for the terraform state file
+      tf_state_sa_name: "mystorageaacountname" # name of of the storage account to create/use for the terraform state file
+      tf_state_container_name: "mycontainername" # name of of the container to create/use for the terraform state file
+      tf_environment: "my-project-env" # prefix for the state file name e.g. prod.terraform.tfstate
+      SUBSCRIPTION_NAME: "my-service-connection" # service connection name   
+      env: "my-devops-env-name"
+      working_directory: "path/to/main.tf"
